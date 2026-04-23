@@ -14,86 +14,87 @@ static const char *const TAG = "taixia.binary_sensor";
 
   void TaiXiaBinarySensor::handle_response(std::vector<uint8_t> &response) {
     uint8_t i;
+    bool new_state = this->state;
+    uint8_t status_offset = (this->parent_->get_version() < 3.0) ? 1 : 2;
 
-    for (i = 6; i < response[0] - 3; i+=3) {
+    // TODO check with tsunglung why for SERVICE_ID_***_STATUS
+    // the value is read from 4th instead of 5th byte in response
+
+    for (i = 3; i < response[0] - 3; i+=3) {
+      // all the logic acts only if 'this' matches the response service_id
+      // so just skip entries that do not match to speed things up a little
+      if (this->service_id_ != response[i]) {
+        continue;
+      }
+
       ESP_LOGV(TAG, "handle_response[%d] {0x%2.2x, 0x%2.2x, 0x%2.2x}",
                     i, response[i+0], response[i+1], response[i+2]);
 
-      if (this->service_id_ == 0x00) { // SERVICE_ID_***_STATUS
-        this->state = bool(response[4]);
-        goto done; // break out of encompassing for loop
-      }
+      // NOTE: this can be optimized even more
       switch(this->sa_id_) {
         case SA_ID_CLIMATE:
           switch (response[i]) {
+            case SERVICE_ID_CLIMATE_STATUS:
+              new_state = bool(response[i + status_offset]);
+              break;
             case SERVICE_ID_CLIMATE_FILTER_NOTIFY:
-              if (this->service_id_ == SERVICE_ID_CLIMATE_FILTER_NOTIFY) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
+              new_state = bool(response[i + 2]);
+              break;
+          }
+          break;
+        case SA_ID_WASHER:
+          switch (response[i]) {
+            case SERVICE_ID_WASHER_STATUS:
+              new_state = bool(response[i + status_offset]);
               break;
           }
           break;
         case SA_ID_DEHUMIDIFIER:
           switch (response[i]) {
+            case SERVICE_ID_DEHUMIDTFIER_STATUS:
+              new_state = bool(response[i + status_offset]);
+              break;
             case SERVICE_ID_DEHUMIDTFIER_WATER_TANK_FULL:
-              if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_WATER_TANK_FULL) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_DEHUMIDTFIER_AIR_PURFIFIER:
-              if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_AIR_PURFIFIER) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_DEHUMIDTFIER_SIDE_AIR_VENT:
-              if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_SIDE_AIR_VENT) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_DEHUMIDTFIER_DEFROST:
-              if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_DEFROST) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_DEHUMIDTFIER_FILTER_RESET:
-              if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_FILTER_RESET) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
+              new_state = bool(response[i + 2]);
+              break;
+          }
+          break;
+        case SA_ID_AIR_PURIFIER:
+          switch (response[i]) {
+            case SERVICE_ID_PURIFIER_STATUS:
+              new_state = bool(response[i + status_offset]);
               break;
           }
           break;
         case SA_ID_ERV:
           switch (response[i]) {
+            case SERVICE_ID_ERV_STATUS:
+              new_state = bool(response[i + status_offset]);
+              break;
             case SERVICE_ID_ERV_RESET_FILTER_NOTIFY:
-              if (this->service_id_ == SERVICE_ID_ERV_RESET_FILTER_NOTIFY) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_ERV_FRONT_FILTER_NOTIFY:
-              if (this->service_id_ == SERVICE_ID_ERV_FRONT_FILTER_NOTIFY) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
-              break;
             case SERVICE_ID_ERV_PM25_FILTER_NOTIFY:
-              if (this->service_id_ == SERVICE_ID_ERV_PM25_FILTER_NOTIFY) {
-                this->state = bool(response[i + 2]);
-                goto done; // break out of both switches AND the for loop
-              }
+              new_state = bool(response[i + 2]);
+              break;
+          }
+          break;
+        case SA_ID_FAN:
+          switch (response[i]) {
+            case SERVICE_ID_FAN_STATUS:
+              new_state = bool(response[i + status_offset]);
               break;
           }
           break;
       }
+      break; // out of the for loop
     }
-done:
-    this->publish_state(this->state);
+    if (this->state != new_state) {
+      this->publish_state(this->state);
+    }
   }
 
 }  // namespace taixia

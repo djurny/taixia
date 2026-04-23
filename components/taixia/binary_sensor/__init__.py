@@ -22,6 +22,7 @@ from .. import (
 
 DEPENDENCIES = ["taixia"]
 
+CONF_POWER = "power"
 CONF_WATER_TANK_FULL = "water_tank_full"
 CONF_FILTER_NOTIFY = "filter_notify"
 CONF_SIDE_AIR_FLOW = "side_air_flow"
