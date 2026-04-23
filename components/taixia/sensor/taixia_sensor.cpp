@@ -90,6 +90,7 @@ void AirConditionerSensor::dump_config() {
 
 void AirConditionerSensor::handle_response(std::vector<uint8_t> &response) {
   uint8_t i;
+  float fvalue;
 
   ESP_LOGV(TAG, " handle_response %x %x %x %x %x %x %x %x %x", \
       response[0], response[1], response[2], response[3], \
@@ -97,12 +98,20 @@ void AirConditionerSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 9; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
       case SERVICE_ID_CLIMATE_TEMPERATURE_INDOOR:
         if (this->temperature_indoor_sensor_ != nullptr) {
-          publish_i16(response, i, this->temperature_indoor_sensor_);
+          fvalue = (float)get_i16(response, i + 1);
+          if (fvalue < -50.0 || fvalue > 100.0) {
+            ESP_LOGE(TAG, "Ignoring current indoor temperature reported by appliance: %f",
+                    fvalue);
+          } else {
+            publish_i16(response, i, this->temperature_indoor_sensor_);
+          }
         }
       break;
       case SERVICE_ID_CLIMATE_HUMIDITY_INDOOR:
@@ -112,7 +121,13 @@ void AirConditionerSensor::handle_response(std::vector<uint8_t> &response) {
       break;
       case SERVICE_ID_CLIMATE_TEMPERATURE_OUTDOOR:
         if (this->temperature_outdoor_sensor_ != nullptr) {
-          publish_i16(response, i, this->temperature_outdoor_sensor_);
+          fvalue = (float)get_i16(response, i + 1);
+          if (fvalue < -50.0 || fvalue > 100.0) {
+            ESP_LOGE(TAG, "Ignoring current outdoor temperature reported by appliance: '%f'",
+                     fvalue);
+          } else {
+            publish_i16(response, i, this->temperature_outdoor_sensor_);
+          }
         }
       break;
       case SERVICE_ID_CLIMATE_HUMIDITY_OUTDOOR:
@@ -214,6 +229,8 @@ void DehumidifierSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 3; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
@@ -318,6 +335,8 @@ void WashingMachineSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 9; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
@@ -431,6 +450,8 @@ void AirPurifierSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 9; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
@@ -493,6 +514,8 @@ void ErvSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 9; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
@@ -556,6 +579,8 @@ void ElectricFanSensor::handle_response(std::vector<uint8_t> &response) {
 
   for (i = 9; i < response[0] - 3; i+=3) {
     if ((response[i + 1] == 0xFF) && (response[i + 2] == 0xFF)) {
+      ESP_LOGW(TAG, "Value unavailable for service ID 0x%2.2x",
+                    response[i]);
       continue;
     }
     switch (response[i]) {
