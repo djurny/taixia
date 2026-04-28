@@ -6,13 +6,15 @@ namespace esphome {
 namespace taixia {
 
 static const char *const TAG = "taixia.select";
+static const uint8_t RESPONSE_LENGTH = 255;
+static const uint8_t CMD_LENGTH = 6;
 
   static inline uint16_t get_u16(std::vector<uint8_t> &response, int start) {
     return (response[start] << 8) + response[start + 1];
   }
 
   static inline size_t get_mapping_idx(std::vector<uint8_t> &response, int start, std::vector<uint8_t> mappings) {
-    if ((response[start + 1] == 0xFF) && (response[start + 2] == 0xFF)) {
+    if (get_u16(response, start + 1) == 0xffff) {
       return -1;
     } else {
       uint8_t enum_value = get_u16(response, start + 1);
@@ -88,17 +90,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
   void WashingMachineSelect::dump_config() {
@@ -160,17 +152,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
   void DehumidifierSelect::dump_config() {
@@ -222,17 +204,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
   void AirPurifierSelect::dump_config() {
@@ -279,17 +251,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
   void ErvSelect::dump_config() {
@@ -341,17 +303,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
   void ElectricFanSelect::dump_config() {
@@ -398,17 +350,7 @@ static const char *const TAG = "taixia.select";
                                   (uint16_t)mapping)) {
       this->publish_state(value);
     }
-
-    ESP_LOGV(TAG, "Control is %s",
-             (this->parent_->get_optimistic() ? "optimistic" :
-                                                "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
-      }
-    }
+    this->parent_->read_appliance_status_conditional_();
   }
 
 }  // namespace taixia

@@ -13,6 +13,23 @@
 namespace esphome {
 namespace taixia {
 
+#define ASSERTIONS
+
+#if defined(ASSERTIONS)
+#define ASSERT(x) \
+  { \
+    if (!(x)) { \
+      ESP_LOGE(TAG, "Assertion failed at line %d of function %s in file %s", \
+               __LINE__, __FUNCTION__, __FILE__); \
+    }; \
+  };
+#else // ASSERTIONS
+#define ASSERT(x)
+#endif // ASSERTIONS
+
+#define SA_ID_ANY 0xff
+#define SERVICE_ID_UNDEFINED 0xff
+
 #define WRITE (0x1 << 7)
 #define SA_ID_ALL 0x00
 #define SERVICE_ID_REGISTER 0x00
@@ -205,13 +222,11 @@ class TaiXia;
 
 class TaiXiaListener {
  public:
-  void set_sa_id(uint16_t sa_id) { this->sa_id_ = sa_id; }
-
-  void on_response(uint16_t sa_id, std::vector<uint8_t> &response);
+  void set_sa_id(uint8_t sa_id) { this->sa_id_ = sa_id; }
+  void on_response(uint8_t sa_id, std::vector<uint8_t> &response);
 
  protected:
-  uint16_t sa_id_{0};
-
+  uint8_t sa_id_{SA_ID_ANY};
   virtual void handle_response(std::vector<uint8_t> &response) = 0;
 };
 
@@ -232,13 +247,16 @@ class TaiXia : public uart::UARTDevice, public Component {
 
   uint8_t checksum(const uint8_t *data, uint8_t len);
   void readline(bool handle_response);
-  bool send(uint8_t packet_length, uint8_t date_type, uint8_t sa_id, uint8_t service_id, uint16_t data);
+  bool send(uint8_t packet_length, uint8_t data_type,
+            uint8_t sa_id, uint8_t service_id, uint16_t data);
   bool send_cmd(const uint8_t *command, uint8_t *response, uint8_t len) {
     if (this->version_ < 3.0)
       return write_command_(command, response, len, len, 60000);
     else
       return write_command_(command, response, len, len);
   }
+  void read_appliance_status_conditional_();
+
   bool set_select(uint8_t sa_id, uint8_t service_id, uint16_t selection);
   bool switch_command(uint8_t sa_id, uint8_t service_id, bool onoff);
   bool set_number(uint8_t sa_id, uint8_t service_id, float value);
@@ -338,7 +356,7 @@ class TaiXia : public uart::UARTDevice, public Component {
   std::vector<uint8_t> rx_;
   uint32_t rx_last_byte_ms_{0};
   uint8_t protocol_;
-  uint8_t sa_id_{0xff};
+  uint8_t sa_id_{SA_ID_ANY};
   float version_{4.0};
   uint8_t len_;
   uint16_t max_length_{0};
@@ -350,6 +368,7 @@ class TaiXia : public uart::UARTDevice, public Component {
 
   bool write_command_(const uint8_t *command, uint8_t *response, uint8_t len, uint8_t tlen, uint32_t timeout);
   bool write_command_(const uint8_t *command, uint8_t *response, uint8_t len, uint8_t tlen);
+  bool validate_response_(uint8_t* command, uint8_t* response, bool confirm_write);
 };
 
 }  // namespace taixia

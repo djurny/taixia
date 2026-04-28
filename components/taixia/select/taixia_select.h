@@ -27,7 +27,7 @@ class AirConditionerSelect : public select::Select, public TaiXiaListener, publi
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *fuzzy_mode_select_{nullptr};
@@ -55,7 +55,7 @@ class WashingMachineSelect : public select::Select, public TaiXiaListener, publi
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *wash_program_select_{nullptr};
@@ -82,7 +82,7 @@ class DehumidifierSelect : public select::Select, public TaiXiaListener, public 
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *operating_program_select_{nullptr};
@@ -106,7 +106,7 @@ class AirPurifierSelect : public select::Select, public TaiXiaListener, public C
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *operating_program_select_{nullptr};
@@ -129,7 +129,7 @@ class ErvSelect : public select::Select, public TaiXiaListener, public Component
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *ventilate_mode_select_{nullptr};
@@ -152,7 +152,7 @@ class ElectricFanSelect : public select::Select, public TaiXiaListener, public C
   void control(const std::string &value) override;
 
   TaiXia *parent_;
-  uint8_t service_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
   std::vector<uint8_t> mappings_;
 
   select::Select *operating_program_select_{nullptr};

@@ -19,9 +19,9 @@ static const char *const TAG = "taixia.binary_sensor";
       ESP_LOGV(TAG, "handle_response[%d] {0x%2.2x, 0x%2.2x, 0x%2.2x}",
                     i, response[i+0], response[i+1], response[i+2]);
 
-      if (this->service_id_ == 0x00) {
+      if (this->service_id_ == 0x00) { // SERVICE_ID_***_STATUS
         this->state = bool(response[4]);
-        goto done;
+        goto done; // break out of encompassing for loop
       }
       switch(this->sa_id_) {
         case SA_ID_CLIMATE:
@@ -29,7 +29,7 @@ static const char *const TAG = "taixia.binary_sensor";
             case SERVICE_ID_CLIMATE_FILTER_NOTIFY:
               if (this->service_id_ == SERVICE_ID_CLIMATE_FILTER_NOTIFY) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
           }
@@ -39,31 +39,31 @@ static const char *const TAG = "taixia.binary_sensor";
             case SERVICE_ID_DEHUMIDTFIER_WATER_TANK_FULL:
               if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_WATER_TANK_FULL) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
             case SERVICE_ID_DEHUMIDTFIER_AIR_PURFIFIER:
               if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_AIR_PURFIFIER) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
-            case SERVICE_ID_DEHUMIDTFIER_SIDE_AIR_VENT:
               break;
+            case SERVICE_ID_DEHUMIDTFIER_SIDE_AIR_VENT:
               if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_SIDE_AIR_VENT) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
             case SERVICE_ID_DEHUMIDTFIER_DEFROST:
               if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_DEFROST) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
             case SERVICE_ID_DEHUMIDTFIER_FILTER_RESET:
               if (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_FILTER_RESET) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
           }
@@ -73,19 +73,19 @@ static const char *const TAG = "taixia.binary_sensor";
             case SERVICE_ID_ERV_RESET_FILTER_NOTIFY:
               if (this->service_id_ == SERVICE_ID_ERV_RESET_FILTER_NOTIFY) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
             case SERVICE_ID_ERV_FRONT_FILTER_NOTIFY:
               if (this->service_id_ == SERVICE_ID_ERV_FRONT_FILTER_NOTIFY) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
             case SERVICE_ID_ERV_PM25_FILTER_NOTIFY:
               if (this->service_id_ == SERVICE_ID_ERV_PM25_FILTER_NOTIFY) {
                 this->state = bool(response[i + 2]);
-                goto done;
+                goto done; // break out of both switches AND the for loop
               }
               break;
           }

@@ -34,7 +34,7 @@ class TaiXiaFan : public TaiXiaListener, public PollingComponent, public fan::Fa
   optional<uint8_t> mode_{};
   optional<uint8_t> oscillation_{};
   int speed_count_{};
-  uint8_t sa_id_;
+  uint8_t sa_id_{SA_ID_ANY};
   bool have_sensors_{false};
   std::vector<const char *> preset_modes_{};
 

@@ -16,8 +16,8 @@ class TaiXiaButton : public button::Button, public Component {
 
  protected:
   void press_action() override;
-  uint8_t service_id_{0xff};
-  uint8_t sa_id_{0xff};
+  uint8_t service_id_{SERVICE_ID_UNDEFINED};
+  uint8_t sa_id_{SA_ID_ANY};
 
   TaiXia *parent_;
 };

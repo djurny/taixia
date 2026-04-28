@@ -623,7 +623,7 @@ void ElectricFanSensor::update() {
 
 void TaiXiaCustomSensor::dump_config() {
   ESP_LOGCONFIG(TAG, "TaiXIA Custom Sensor:");
-  if (this->sa_id_ == 0xffff) {
+  if (this->sa_id_ == SA_ID_ANY) {
     ESP_LOGCONFIG(TAG, "  SA ID: ANY");
   } else {
     ESP_LOGCONFIG(TAG, "  SA ID: 0x%04x", this->sa_id_);
