@@ -81,9 +81,9 @@ using namespace esphome::climate;
     uint8_t command[6] = {0x06, SA_ID_CLIMATE, 0x00, 0x00, 0x00, 0x00};
     uint8_t buffer[6];
     uint8_t swing_horizontal = 0x00;
-    uint8_t swing_horizontal_level = -1;
+    uint8_t swing_horizontal_level = 0xff;
     uint8_t swing_vertical = 0x00;
-    uint8_t swing_vertical_level = -1;
+    uint8_t swing_vertical_level = 0xff;
 
     if (this->sa_id_ == 14)
       command[1] = SA_ID_ERV;
@@ -293,57 +293,59 @@ using namespace esphome::climate;
           swing_horizontal = 0x00;        // turn off horizontal swing
           swing_horizontal_level = 0x03;  // set horizontal fan angle to center
           swing_vertical = 0x01;          // turn ON vertical swing
+          swing_vertical_level = 0x00;    // set vertical fan angle to swing
           break;
         case CLIMATE_SWING_HORIZONTAL:
           swing_horizontal = 0x01;        // turn ON horizontal swing
           swing_horizontal_level = 0x00;  // set horizontal fan angle to swing
           swing_vertical = 0x00;          // turn off vertical swing
+          // swing_vertical_level = 0x03;
           break;
         case CLIMATE_SWING_BOTH:
           swing_horizontal = 0x01;        // turn ON horizontal swing
           swing_horizontal_level = 0x00;  // set horizontal fan angle to swing
           swing_vertical = 0x01;          // turn ON vertical swing
+          swing_vertical_level = 0x00;    // set vertical fan angle to swing
           break;
         //case CLIMATE_SWING_OFF:
         default:
           swing_horizontal = 0x00;        // turn off horizontal swing
           swing_horizontal_level = 0x03;  // set horizontal fan angle to center
           swing_vertical = 0x00;          // turn off vertical swing
+          // swing_vertical_level = 0x03;
           break;
       }
       // send all swing settings
-      command[2] = WRITE | SERVICE_ID_CLIMATE_SWING_HORIZONTAL;
-      command[4] = swing_horizontal;
-      command[5] = this->parent_->checksum(command, 5);
-      this->parent_->send_cmd(command, buffer, 6);
+      if (swing_horizontal != 0xff) {
+        // NOTE not all appliances support this setting
+        this->parent_->switch_command(this->sa_id_,
+                                      SERVICE_ID_CLIMATE_SWING_HORIZONTAL,
+                                      swing_horizontal == 0x00 ? false : true);
+      }
 
-      command[2] = WRITE | SERVICE_ID_CLIMATE_SWING_HORIZONTAL_LEVEL;
-      command[4] = swing_horizontal_level;
-      command[5] = this->parent_->checksum(command, 5);
-      this->parent_->send_cmd(command, buffer, 6);
+      if (swing_horizontal_level != 0xff) {
+        // NOTE not all appliances support this setting
+        this->parent_->set_number(this->sa_id_,
+                                  SERVICE_ID_CLIMATE_SWING_HORIZONTAL_LEVEL,
+                                  swing_horizontal_level);
+      }
 
-      command[2] = WRITE | SERVICE_ID_CLIMATE_SWING_VERTICAL;
-      command[4] = swing_vertical;
-      command[5] = this->parent_->checksum(command, 5);
-      this->parent_->send_cmd(command, buffer, 6);
+      if (swing_vertical != 0xff) {
+        // NOTE not all appliances support this setting
+        this->parent_->switch_command(this->sa_id_,
+                                      SERVICE_ID_CLIMATE_SWING_VERTICAL,
+                                      swing_vertical == 0x00 ? false : true);
+      }
 
-      // command[2] = WRITE | SERVICE_ID_CLIMATE_SWING_VERTICAL_LEVEL;
-      // command[4] = swing_vertical_level;
-      // command[5] = this->parent_->checksum(command, 5);
-      // this->parent_->send_cmd(command, buffer, 6);
-    }
-    this->publish_state();
-    ESP_LOGV(
-      TAG,
-      "Control is %s",
-      (this->parent_->get_optimistic() ? "optimistic" : "pessimistic"));
-    if (!this->parent_->get_optimistic()) {
-      if (this->parent_->get_version() < 3.0) {
-        this->parent_->read_sa_status();
-      } else {
-        this->parent_->send(6, 0, 0, SERVICE_ID_READ_STATUS, 0xffff);
+      if (swing_vertical_level != 0xff) {
+        // NOTE not all appliances support this setting
+        this->parent_->set_number(this->sa_id_,
+                                  SERVICE_ID_CLIMATE_SWING_VERTICAL_LEVEL,
+                                  swing_vertical_level);
       }
     }
+    this->publish_state();
+    this->parent_->read_appliance_status_conditional_();
   }
 
   bool TaiXiaClimate::update_status_() {
@@ -358,7 +360,8 @@ using namespace esphome::climate;
     // TODO: if the hub component is already polling, do we also need to include polling?
     //  We're already going to get on_status() at the hub's polling interval.
     auto result = this->update_status_();
-    ESP_LOGV(TAG, "[%s] update_status result=%s", this->get_name().c_str(), result ? "true" : "false");
+    ESP_LOGV(TAG, "[%s] update_status result=%s",
+             this->get_name().c_str(), result ? "true" : "false");
   }
 
   void TaiXiaClimate::set_supported_preset_modes(const climate::ClimatePresetMask &modes) {
@@ -482,9 +485,9 @@ using namespace esphome::climate;
     float fvalue;
     uint16_t uvalue;
     uint8_t swing_vertical = 0;
-    uint8_t swing_vertical_level = -1;
+    uint8_t swing_vertical_level = 0xff;
     uint8_t swing_horizontal = 0;
-    uint8_t swing_horizontal_level = -1;
+    uint8_t swing_horizontal_level = 0xff;
     /* 0: swing
      * 1: ----\\ stationary right
      * 2: ---\-- stationary center-right
@@ -642,15 +645,16 @@ using namespace esphome::climate;
               "SERVICE_ID_CLIMATE_SWING_VERTICAL(%2.2x): %2.2d",
               SERVICE_ID_CLIMATE_SWING_VERTICAL,
               uvalue);
-          if (swing_vertical_level != -1) {
-            if (uvalue >= 1)
-              swing_vertical = 1;
-          } else {
+          if (swing_vertical_level != 0xff) {
             ESP_LOGW(
               TAG,
               "SERVICE_ID_CLIMATE_SWING_VERTICAL ignored as **_LEVEL(%2.2x) already received (%2.2d)",
               SERVICE_ID_CLIMATE_SWING_VERTICAL_LEVEL,
               swing_vertical_level);
+          } else {
+            if (uvalue >= 1) {
+              swing_vertical = 1;
+            }
           }
           break;
         case SERVICE_ID_CLIMATE_SWING_VERTICAL_LEVEL:
@@ -674,15 +678,16 @@ using namespace esphome::climate;
             "SERVICE_ID_CLIMATE_SWING_HORIZONTAL(%2.2x): %2.2d",
             SERVICE_ID_CLIMATE_SWING_HORIZONTAL,
             uvalue);
-          if (swing_horizontal_level != -1) {
-            if (uvalue >= 1)
-              swing_horizontal = 1;
-          } else {
+          if (swing_horizontal_level != 0xff) {
             ESP_LOGW(
               TAG,
               "SERVICE_ID_CLIMATE_SWING_HORIZONTAL ignored as **_LEVEL(%2.2x) already received (%2.2d)",
               SERVICE_ID_CLIMATE_SWING_HORIZONTAL_LEVEL,
               swing_horizontal_level);
+          } else {
+            if (uvalue >= 1) {
+              swing_horizontal = 1;
+            }
           }
           break;
         case SERVICE_ID_CLIMATE_SWING_HORIZONTAL_LEVEL:
