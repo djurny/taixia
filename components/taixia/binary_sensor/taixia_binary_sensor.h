@@ -16,8 +16,8 @@ class TaiXiaBinarySensor : public binary_sensor::BinarySensor, public TaiXiaList
   void dump_config() override;
 
  protected:
-  uint8_t service_id_;
-  uint8_t sa_id_;
+  uint8_t service_id_{0xff};
+  uint8_t sa_id_{0xff};
 
   TaiXia *parent_;
 

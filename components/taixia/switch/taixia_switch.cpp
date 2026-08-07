@@ -14,7 +14,7 @@ static const char *const TAG = "taixia.switch";
   }
 
   void TaiXiaSwitch::write_state(bool state) {
-    if (this->service_id_ >= 0) {
+    if (this->service_id_ < 0xff) {
       bool org_state = state;
       if (((this->sa_id_ == SA_ID_CLIMATE) && (this->service_id_ == SERVICE_ID_CLIMATE_BEEPER)) || 
           ((this->sa_id_ == SA_ID_DEHUMIDIFIER) && (this->service_id_ == SERVICE_ID_DEHUMIDTFIER_BEEPER)))

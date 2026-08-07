@@ -17,8 +17,8 @@ class TaiXiaSwitch : public switch_::Switch, public TaiXiaListener, public Compo
 
  protected:
   void write_state(bool state) override;
-  uint8_t service_id_;
-  uint8_t sa_id_;
+  uint8_t service_id_{0xff};
+  uint8_t sa_id_{0xff};
   bool immediate_update_{true};
 
   TaiXia *parent_;

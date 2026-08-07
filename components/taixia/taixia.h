@@ -337,7 +337,7 @@ class TaiXia : public uart::UARTDevice, public Component {
   std::vector<uint8_t> rx_;
   uint32_t rx_last_byte_ms_{0};
   uint8_t protocol_;
-  uint8_t sa_id_;
+  uint8_t sa_id_{0xff};
   float version_{4.0};
   uint8_t len_;
   uint16_t max_length_{0};

@@ -113,12 +113,12 @@ void AirConditionerSensor::handle_response(std::vector<uint8_t> &response) {
             publish_i16(response, i, this->temperature_indoor_sensor_);
           }
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_HUMIDITY_INDOOR:
         if (this->humidity_indoor_sensor_ != nullptr) {
           publish_u16(response, i, this->humidity_indoor_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_TEMPERATURE_OUTDOOR:
         if (this->temperature_outdoor_sensor_ != nullptr) {
           fvalue = (float)get_i16(response, i + 1);
@@ -129,52 +129,52 @@ void AirConditionerSensor::handle_response(std::vector<uint8_t> &response) {
             publish_i16(response, i, this->temperature_outdoor_sensor_);
           }
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_HUMIDITY_OUTDOOR:
         if (this->humidity_outdoor_sensor_ != nullptr) {
           publish_u16(response, i, this->humidity_outdoor_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_OPERATING_CURRENT:
         if (this->operating_current_sensor_ != nullptr) {
           publish_float_div_10(response, i, this->operating_current_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_OPERATING_VOLTAGE:
         if (this->operating_voltage_sensor_ != nullptr) {
           publish_u16(response, i, this->operating_voltage_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_OPERATING_WATT:
         if (this->operating_power_sensor_ != nullptr) {
           publish_u16(response, i, this->operating_power_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_ENERGY_CONSUMPTION:
         if (this->energy_consumption_sensor_ != nullptr) {
           publish_float_div_10(response, i, this->energy_consumption_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_OPERATING_HOURS:
         if (this->operating_hours_sensor_ != nullptr) {
           publish_u16(response, i, this->operating_hours_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_ERROR_CODE:
         if (this->error_code_sensor_ != nullptr) {
           publish_u16(response, i, this->error_code_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_FILTER_CLEAN_HOURS:
         if (this->filter_clean_hours_sensor_ != nullptr) {
           publish_u16(response, i, this->filter_clean_hours_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_CLIMATE_PM2_5:
         if (this->pm_2_5_sensor_ != nullptr) {
           publish_u16(response, i, this->pm_2_5_sensor_);
         }
-      break;
+        break;
     }
   }
 }
@@ -523,20 +523,22 @@ void ErvSensor::handle_response(std::vector<uint8_t> &response) {
         if (this->temperature_indoor_sensor_ != nullptr) {
           publish_i16(response, i, this->temperature_indoor_sensor_);
         }
-      break;
+        break;
       case SERVICE_ID_ERV_TEMPERATURE_OUTDOOR:
         if (this->temperature_outdoor_sensor_ != nullptr) {
           publish_i16(response, i, this->temperature_outdoor_sensor_);
         }
+        break;
       case SERVICE_ID_ERV_MODEL_TYPE:
         if (this->model_type_sensor_ != nullptr) {
           publish_i16(response, i, this->model_type_sensor_);
         }
+        break;
       case SERVICE_ID_ERV_ERROR_CODE:
         if (this->error_code_sensor_ != nullptr) {
           publish_i16(response, i, this->error_code_sensor_);
         }
-      break;
+        break;
     }
   }
 }

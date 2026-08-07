@@ -34,7 +34,9 @@ static const uint32_t RX_STALE_MS = 250;
   }
 
   bool TaiXia::write_command_(const uint8_t *command, uint8_t *response, uint8_t len, uint8_t rlen, uint32_t timeout) {
-    ESP_LOGV(TAG, "command %x %x %x %x %x %x, wait %d us", command[0], command[1], command[2], command[3], command[4], command[5], this->response_time_);
+    ESP_LOGV(TAG, "command %x %x %x %x %x %x, wait %ld us",
+             command[0], command[1], command[2], command[3],
+             command[4], command[5], this->response_time_);
 
     if (response == nullptr)
       return true;
@@ -75,7 +77,10 @@ static const uint32_t RX_STALE_MS = 250;
     this->send(6, 0, 0x00, SERVICE_ID_READ_VERSION, 0xFFFF);
     this->readline(false);
 
-    if ((this->buffer_[0] >= 0x0) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_READ_VERSION)) {
+    if ((this->buffer_[0] == this->buffer_.size()) &&
+        (this->buffer_[0] >= 4+1) &&
+        (this->buffer_[1] == 0x0) &&
+        (this->buffer_[2] == SERVICE_ID_READ_VERSION)) {
       if (this->version_textsensor_ != nullptr) {
         std::string version;
         version = format_hex_pretty(this->buffer_[3]) + "." + format_hex_pretty(this->buffer_[4]);
@@ -90,15 +95,24 @@ static const uint32_t RX_STALE_MS = 250;
     }
     this->readline(false);
 
-    if ((this->buffer_[0] >= 0x0) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_READ_SA_ID)) {
+    if ((this->buffer_[0] == this->buffer_.size()) &&
+        (this->buffer_[0] >= 4+1) &&
+        (this->buffer_[1] == 0x0) &&
+        (this->buffer_[2] == SERVICE_ID_READ_SA_ID)) {
       if (this->sa_id_textsensor_ != nullptr) {
         std::string sa_id;
         sa_id = format_hex_pretty(this->buffer_[3]) + format_hex_pretty(this->buffer_[4]);
         this->sa_id_textsensor_->publish_state(sa_id);
       }
       // if not preset sa_id
-      if (this->sa_id_ == 0)
-        this->sa_id_ = this->buffer_[3] << 8 | this->buffer_[4];
+      if (this->sa_id_ == 0xff) {
+        if (this->buffer_[3] == 0) {
+          this->sa_id_ = this->buffer_[4];
+        } else {
+          ESP_LOGE(TAG, "Appliance reported 16bit sa_id_ (%2.2x%2.2x)",
+                   this->buffer_[3], this->buffer_[4]);
+        }
+      }
     }
     this->buffer_.clear();
 
@@ -108,7 +122,10 @@ static const uint32_t RX_STALE_MS = 250;
     }
     this->readline(false);
 
-    if ((this->buffer_[0] >= 0x0) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_READ_BRAND)) {
+    if ((this->buffer_[0] == this->buffer_.size()) &&
+        (this->buffer_[0] < MAX_FRAME_LENGTH) &&
+        (this->buffer_[1] == 0x0) &&
+        (this->buffer_[2] == SERVICE_ID_READ_BRAND)) {
       std::string brand;
       for (i = 3; i < this->buffer_[0]; i++) {
         if (this->buffer_[i] != 0x0) {
@@ -129,7 +146,10 @@ static const uint32_t RX_STALE_MS = 250;
     }
     this->readline(false);
 
-    if ((this->buffer_[0] >= 0x0) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_READ_MODEL)) {
+    if ((this->buffer_[0] == this->buffer_.size()) &&
+        (this->buffer_[0] < MAX_FRAME_LENGTH) &&
+        (this->buffer_[1] == 0x0) &&
+        (this->buffer_[2] == SERVICE_ID_READ_MODEL)) {
       std::string model;
       for (i = 3; i < this->buffer_[0]; i++) {
         if (this->buffer_[i] != 0x0) {
@@ -161,7 +181,8 @@ static const uint32_t RX_STALE_MS = 250;
     }
 
     // compatible with Panasonic which do not include service id of read services in response
-    if ((this->buffer_[0] >= 0x0)
+    if ((this->buffer_[0] == this->buffer_.size()) &&
+        (this->buffer_[0] < MAX_FRAME_LENGTH)
 //        && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_READ_SERVICES)
         && crc == this->buffer_[len - 1]
       ) {
@@ -190,7 +211,7 @@ static const uint32_t RX_STALE_MS = 250;
     this->readline(false);
 
 //    uint8_t crc = this->checksum(this->buffer_, this->buffer_[0] - 1);
-    if ((this->buffer_[0] >= 0x0) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_REGISTER)) {
+    if ((this->buffer_[0] < MAX_FRAME_LENGTH) && (this->buffer_[1] == 0x0) && (this->buffer_[2] == SERVICE_ID_REGISTER)) {
 
       std::string brand;
       for (i = 8; i < this->buffer_[0]; i++) {
@@ -244,7 +265,6 @@ static const uint32_t RX_STALE_MS = 250;
   }
 
   void TaiXia::switch_command(uint8_t sa_id, uint8_t service_id, bool onoff) {
-    ESP_LOGV(TAG, "switch command: %d %d %d %x", this->sa_id_, sa_id, service_id, onoff);
     if (this->sa_id_ != sa_id)
       return;
 

@@ -16,8 +16,8 @@ class TaiXiaNumber : public number::Number, public TaiXiaListener, public Compon
 
  protected:
   void control(float value) override;
-  uint8_t service_id_;
-  uint8_t sa_id_;
+  uint8_t service_id_{0xff};
+  uint8_t sa_id_{0xff};
 
   TaiXia *parent_;
 

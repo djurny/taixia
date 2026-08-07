@@ -19,7 +19,7 @@ static const char *const TAG = "taixia.nubmer";
   }
 
   void TaiXiaNumber::control(float value) {
-    if (this->service_id_ > 0) {
+    if (this->service_id_ < 0xff) {
       this->parent_->set_number(this->sa_id_, this->service_id_, value);
       this->publish_state(value);
       ESP_LOGV(
