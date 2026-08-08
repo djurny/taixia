@@ -93,6 +93,7 @@ static const char *const TAG = "taixia.binary_sensor";
       break; // out of the for loop
     }
     if (this->state != new_state) {
+      this->state = new_state;
       this->publish_state(this->state);
     }
   }
