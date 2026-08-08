@@ -82,11 +82,13 @@ static const uint32_t RX_STALE_MS = 250;
         (this->buffer_[0] >= 4+1) &&
         (this->buffer_[1] == 0x0) &&
         (this->buffer_[2] == SERVICE_ID_READ_VERSION)) {
+      std::string version;
+      version = format_hex_pretty(this->buffer_[3]) + "." + format_hex_pretty(this->buffer_[4]);
       if (this->version_textsensor_ != nullptr) {
-        std::string version;
-        version = format_hex_pretty(this->buffer_[3]) + "." + format_hex_pretty(this->buffer_[4]);
         this->version_textsensor_->publish_state(version);
       }
+      ESP_LOGD(TAG, "Appliance reported version: %s, set version to %2.2f", version.c_str(), this->version_);
+      this->version_ = stof(version);
     }
     this->buffer_.clear();
 
