@@ -22,7 +22,7 @@ from .. import (
 
 DEPENDENCIES = ["taixia"]
 
-CONF_POWER = "power"
+CONF_POWER = "mains_power"
 CONF_WATER_TANK_FULL = "water_tank_full"
 CONF_FILTER_NOTIFY = "filter_notify"
 CONF_SIDE_AIR_FLOW = "side_air_flow"
@@ -33,7 +33,7 @@ CONF_PM25_FILTER_NOTIFY = "pm25_filter_notify"
 CONF_FILTER_RESET = "filter_reset"
 
 ICONS = {
-    CONF_POWER: "mdi:chip",
+    CONF_POWER: "mdi:power-plug",
     CONF_WATER_TANK_FULL: "mdi:cup-water",
     CONF_FILTER_NOTIFY: "mdi:air-filter",
     CONF_SIDE_AIR_FLOW: "mdi:waves",
