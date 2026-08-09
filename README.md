@@ -1,5 +1,4 @@
-ESPHome TaiXia Custom Component
-
+# ESPHome TaiXia Custom Component
 
 ## Special Thank
   ### Thanks for Andrew Wang provide the related hardwares and datasheet.
@@ -8,17 +7,42 @@ ESPHome TaiXia Custom Component
 
 ## Hardware
 
-### UART Port
+### Hitachi
 
-Hitachi JST PAP-04-V
-|Pin|Meaning|
-|---|-------|
-|1|5V|
-|2|GND|
-|3|Rx to aircon or Fan - 5V logic|
-|4|Tx from aircon or Fan- 5V logic|
+Connector used is a JST PAP-04-V ([datasheet](https://www.jst-mfg.com/product/pdf/eng/ePA-F.pdf))
 
-Panasonic 
+<img src="./pictures/pap-04-v-connector.jpg" alt="connector" style="width:25%; height:auto;"><br>Connector is pictured above.
+
+_Note:_ The cables have been rearranged in the connector to help identify the wires. Cables bought online will have a different color scheme and location inside the connector.
+
+<img src="./pictures/hitachi-CN10.jpg" alt="CN10" style="width:25%; height:auto;"><br>Connector header is pictured above - `CN10`.
+
+<img src="./pictures/CN30.jpg" alt="CN30" style="width:25%; height:auto;"><br>Connector header is pictured above - `CN30`.
+
+|From appliance|Description|To ESP8266|Description|
+|:-:           |:-:        |:-:       |:-         |
+|1 |`5V`  |`Vcc` |`5V` on ESP                            |
+|2 |`GND` |`GND` |`GND` on ESP                           |
+|3 |`RX`  |`TX`  |Data sent **to** appliance at 5V TTL   |
+|4 |`TX`  |`RX`  |Data sent **from** appliance at 5V TTL |
+
+Note that the appliance uses 5V TTL logic levels. For ESP devices that are not 5V tolerant (like most of them), you need to use a level shifter and the on-board 3V3 power from the ESP device.
+
+Example level shifter:
+
+<img src="./pictures/level_converter_front.jpg" alt="level_converter_front" style="width:25%; height:auto;"> <img src="./pictures/level_converter_back.jpg" alt="level_converter_back" style="width:25%; height:auto;">
+
+|From appliance|Description|To level shifter|To ESP|Description|
+|:-:           |:-:        |:-:             |:-:   |:-         |
+|1 |`5V`  |`HV`  |`5V`  |This will power the ESP device         |
+|2 |`GND` |`GND` |`GND` |                                       |
+|3 |`RX`  |`HV1` |-     |Data sent **from** ESP at 5V TTL       |
+|4 |`TX`  |`HV2` |-     |Data sent **to** ESP at 5V TTL         |
+|- |-     |`LV`  |`3V3` |3V3 provided by the ESP device         |
+|- |-     |`LV1` |`TX`  |Data sent **to** appliance at 3V3 TTL  |
+|- |-     |`LV2` |`RX`  |Data sent **from** appliance at 3V3 TTL|
+
+### Panasonic
 |Pin|Meaning|
 |---|-------|
 |1||
@@ -26,14 +50,12 @@ Panasonic
 |3||
 |4||
 
-
 ## Installation
-Set wifi_ssid and wifi_password in your esphome's secrets.yaml first
+Set `wifi_ssid` and `wifi_password` in your esphome's `secrets.yaml` first
 
 1. Place the folder 'taixia' into the components of your esphome configuration folder
 2. Create new device with the yaml in this repository
 3. Or you can check the example "climate-taiseia.yaml" or "fan-taiseia.yaml"
-
 
 ## Configuration Example
 
@@ -117,8 +139,6 @@ text_sensor:
       name: "${upper_devicename} SA Services"
 
 # Optional additional component.
-
-
 ```
 The climate example exported to Home Assistant
 <img src="https://github.com/tsunglung/taixia/raw/master/pictures/climate.png">
